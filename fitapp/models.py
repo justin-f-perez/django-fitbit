@@ -4,11 +4,12 @@ from django.utils.encoding import python_2_unicode_compatible
 
 
 UserModel = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+UserFitbitUserModel = getattr(settings, 'USERFITBIT_USER_MODEL', UserModel)
 
 
 @python_2_unicode_compatible
 class UserFitbit(models.Model):
-    user = models.OneToOneField(UserModel)
+    user = models.OneToOneField(UserFitbitUserModel)
     fitbit_user = models.CharField(max_length=32, unique=True)
     auth_token = models.TextField()
     auth_secret = models.TextField()
