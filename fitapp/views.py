@@ -19,7 +19,7 @@ from fitbit.exceptions import (HTTPUnauthorized, HTTPForbidden, HTTPConflict,
 
 from . import forms
 from . import utils
-from .models import UserFitbit, TimeSeriesData, TimeSeriesDataType
+from .models import UserFitbit, TimeSeriesDataType, TimeSeriesData
 from .tasks import get_time_series_data, subscribe, unsubscribe
 
 try:
@@ -76,13 +76,21 @@ def complete(request):
     If :ref:`FITAPP_SUBSCRIBE` is set to True, add a subscription to user
     data at this time.
 
+    Requires the id of the user/model that will be associated with a UserFitbit
+    to be inserted into request.session['fb_user_id'] prior to calling the
+    view.
+
     URL name:
         `fitbit-complete`
     """
+    user_model = UserFitbit.user.field.to
+
     fb = utils.create_fitbit()
     try:
         token = request.session.pop('token')
         verifier = request.GET.get('oauth_verifier')
+        fb_user_id = int(request.session['fb_user_id'])
+        user = user_model.objects.get(pk=fb_user_id)
     except KeyError:
         return redirect(reverse('fitbit-error'))
     try:
@@ -93,7 +101,7 @@ def complete(request):
     if UserFitbit.objects.filter(fitbit_user=fb.client.user_id).exists():
         return redirect(reverse('fitbit-error'))
 
-    fbuser, _ = UserFitbit.objects.get_or_create(user=request.user)
+    fbuser, _ = UserFitbit.objects.get_or_create(user=user)
     fbuser.auth_token = fb.client.resource_owner_key
     fbuser.auth_secret = fb.client.resource_owner_secret
     fbuser.fitbit_user = fb.client.user_id
@@ -106,6 +114,7 @@ def complete(request):
             SUBSCRIBER_ID = utils.get_setting('FITAPP_SUBSCRIBER_ID')
         except ImproperlyConfigured:
             return redirect(reverse('fitbit-error'))
+        print "User would be subscribed at this point"
         subscribe.apply_async((fbuser.fitbit_user, SUBSCRIBER_ID), countdown=5)
         # Create tasks for all data in all data types
         for i, _type in enumerate(TimeSeriesDataType.objects.all()):
@@ -120,7 +129,7 @@ def complete(request):
     return redirect(next_url)
 
 
-@receiver(user_logged_in)
+# @receiver(user_logged_in)  # I think this wouldn't work for our integration
 def create_fitbit_session(sender, request, user, **kwargs):
     """ If the user is a fitbit user, update the profile in the session. """
 
@@ -172,7 +181,12 @@ def logout(request):
     URL name:
         `fitbit-logout`
     """
-    user = request.user
+    user_model = UserFitbit.user.field.to
+    try:
+        fb_user_id = request.session['fb_user_id']
+        user = user_model.objects.get(pk=fb_user_id)
+    except KeyError:
+        return redirect(reverse('fitbit-error'))
     try:
         fbuser = user.userfitbit
     except UserFitbit.DoesNotExist:
@@ -189,7 +203,7 @@ def logout(request):
         'FITAPP_LOGOUT_REDIRECT')
     return redirect(next_url)
 
-
+# TODO: modify update() to accomodate new models
 @csrf_exempt
 def update(request):
     """Receive notification from Fitbit.
@@ -298,9 +312,13 @@ def get_data(request, category, resource):
     retrieve data from either a range of dates, with specific start and end
     days, or from a time period ending on a specific date.
 
+    Requires the id of the user/model that is associated with the UserFitbit
+    to be inserted into request.session['fb_user_id'] prior to calling the
+    view.
+
     The two parameters, category and resource, determine which type of data
-    to retrieve. The category parameter can be one of: foods, activities,
-    sleep, and body. It's the first part of the path in the items listed at
+    to retrieve. The category parameter can be one of: activities or body.
+    It's the first part of the path in the items listed at
     https://wiki.fitbit.com/display/API/API-Get-Time-Series
     The resource parameter should be the rest of the path.
 
@@ -352,9 +370,15 @@ def get_data(request, category, resource):
     URL name:
         `fitbit-data`
     """
+    user_model = UserFitbit.user.field.to
+
+    try:
+        fb_user_id = int(request.session['fb_user_id'])
+        user = user_model.objects.get(pk=fb_user_id)
+    except KeyError:
+        return redirect(reverse('fitbit-error'))
 
     # Manually check that user is logged in and integrated with Fitbit.
-    user = request.user
     try:
         resource_type = TimeSeriesDataType.objects.get(
             category=getattr(TimeSeriesDataType, category), resource=resource)
@@ -362,8 +386,6 @@ def get_data(request, category, resource):
         return make_response(104)
 
     fitapp_subscribe = utils.get_setting('FITAPP_SUBSCRIBE')
-    if not user.is_authenticated() or not user.is_active:
-        return make_response(101)
     if not fitapp_subscribe and not utils.is_integrated(user):
         return make_response(102)
 

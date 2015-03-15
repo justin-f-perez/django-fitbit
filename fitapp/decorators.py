@@ -4,7 +4,7 @@ from django.contrib import messages
 
 from . import utils
 
-
+# TODO: modify decorator to be user independent
 def fitbit_integration_warning(msg=None):
     """
     Adds a message to inform the user about Fitbit integration if their
