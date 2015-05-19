@@ -42,8 +42,10 @@ def get_valid_periods():
 
 
 def get_fitbit_data(fbuser, resource_type, base_date=None, period=None,
-        end_date=None):
-    """Creates a Fitbit API instance and retrieves step data for the period.
+        end_date=None, return_all=False):
+    """Creates a Fitbit API instance and retrieves data for the period.
+
+    :param return_all is used to return all items from the data
 
     Several exceptions may be thrown:
         TypeError           - Either end_date or period must be specified, but
@@ -60,9 +62,11 @@ def get_fitbit_data(fbuser, resource_type, base_date=None, period=None,
     """
     fb = create_fitbit(**fbuser.get_user_data())
     resource_path = resource_type.path()
-    data = fb.time_series(resource_path, user_id=fbuser.fitbit_user,
+    data = fb.time_series(resource_path,
                           period=period, base_date=base_date,
                           end_date=end_date)
+    if return_all:
+        return data
     return data[resource_path.replace('/', '-')]
 
 
