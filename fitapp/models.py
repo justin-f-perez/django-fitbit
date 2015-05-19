@@ -29,29 +29,37 @@ class UserFitbit(models.Model):
 
 
 class TimeSeriesDataType(models.Model):
+    """
+    This model is intended to store information about Fitbit's time series
+    resources, which can be found here:
+    https://wiki.fitbit.com/display/API/API-Get-Time-Series
+    """
 
-    steps = 0
-    body = 1
-    TYPE_CHOICES = (
-        (steps, 'steps'),
+    foods = 0
+    activities = 1
+    sleep = 2
+    body = 3
+    CATEGORY_CHOICES = (
+        (foods, 'foods'),
+        (activities, 'activities'),
+        (sleep, 'sleep'),
         (body, 'body'),
     )
-    category = models.IntegerField(choices=TYPE_CHOICES)
+    category = models.IntegerField(choices=CATEGORY_CHOICES)
     resource = models.CharField(max_length=128)
+    intraday_support = models.BooleanField(default=False)
 
     def __str__(self):
         return self.path()
 
     class Meta:
-        unique_together = ('category', 'resource')
+        unique_together = ('category', 'resource',)
         ordering = ['category', 'resource']
 
     def path(self):
         return '/'.join([self.get_category_display(), self.resource])
 
 
-# Going to run with both this and the individual data models for a bit, to see
-# how well this single type works for data collection
 class TimeSeriesData(models.Model):
     """
     The purpose of this model is to store Fitbit user data obtained from their
@@ -60,62 +68,13 @@ class TimeSeriesData(models.Model):
 
     user = models.ForeignKey(UserFitbitUserModel)
     resource_type = models.ForeignKey(TimeSeriesDataType)
-    date = models.DateField()
+    date = models.DateTimeField()
     value = models.CharField(null=True, default=None, max_length=32)
+    intraday = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('user', 'resource_type', 'date')
+        unique_together = ('user', 'resource_type', 'date', 'intraday')
+        get_latest_by = 'date'
 
     def string_date(self):
         return self.date.strftime('%Y-%m-%d')
-
-
-class DayStepData(models.Model):
-    """
-    This model is intended to store a Fitbit user's daily step data.
-    """
-
-    user = models.ForeignKey(UserFitbitUserModel)
-    steps = models.IntegerField()
-    date = models.DateField()
-
-    def __str__(self):
-        return "{0} - {1} - {2}".format(self.user.__str__(), self.date, self.steps)
-
-    class Meta:
-        unique_together = ('user', 'date')
-
-
-class MinuteStepData(models.Model):
-    """
-    This model is intended to store a Fitbit user's intra-hour step data.
-    Requires Fitbit Partner API status.
-    """
-
-    user = models.ForeignKey(UserFitbitUserModel)
-    steps = models.IntegerField()
-    day = models.ForeignKey(DayStepData)
-    time = models.DateField()
-
-    def __str__(self):
-        return "{0} - {1} - {2}".format(self.user, self.day.date, self.steps)
-
-    class Meta:
-        unique_together = ('user', 'time')
-
-
-class AriaData(models.Model):
-    """
-    This model is intended to store a Fitbit user's Aria scale data, which includes
-    body weight and body fat measurements.
-    """
-
-    user = models.ForeignKey(UserFitbitUserModel)
-    body_weight = models.DecimalField(decimal_places=1, max_digits=4)
-    body_fat = models.DecimalField(decimal_places=1, max_digits=3)
-    bmi = models.DecimalField(decimal_places=1, max_digits=3)
-    date = models.DateField()
-
-    def __str__(self):
-        return "{0} - {1} - {2}, {3}".format(self.user, self.date, self.body_weight,
-                                             self.body_fat)

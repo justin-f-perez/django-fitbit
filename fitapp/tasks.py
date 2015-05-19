@@ -50,7 +50,6 @@ def unsubscribe(*args, **kwargs):
 @shared_task
 def get_time_series_data(fitbit_user, cat, resource, date=None):
     """ Get the user's time series data """
-
     try:
         _type = TimeSeriesDataType.objects.get(category=cat, resource=resource)
     except TimeSeriesDataType.DoesNotExist:
@@ -74,11 +73,89 @@ def get_time_series_data(fitbit_user, cat, resource, date=None):
         for fbuser in fbusers:
             data = utils.get_fitbit_data(fbuser, _type, **dates)
             for datum in data:
-                # Create new record or update existing record
                 date = parser.parse(datum['dateTime'])
+                value = datum['value']
+                # Don't create unnecessary records
+                if int(float(value)) == 0:
+                    continue
+                else:
+                    if _type.intraday_support and \
+                            utils.get_setting('FITAPP_GET_INTRADAY'):
+                        resources = TimeSeriesDataType.objects.filter(
+                            intraday_support=True)
+                        for i, _type in enumerate(resources):
+                            # Offset each call by 2 seconds so they don't
+                            # bog down the server
+                            get_intraday_data.apply_async(
+                                (fbuser.fitbit_user, _type.category,
+                                 _type.resource,), {'date': date},
+                                countdown=(2 * i))
+                    # Create new record or update existing record
+                    tsd, created = TimeSeriesData.objects.get_or_create(
+                        user=fbuser.user, resource_type=_type, date=date)
+                    tsd.value = value
+                    tsd.save()
+        # Release the lock
+        cache.delete(lock_id)
+    except HTTPTooManyRequests:
+        # We have hit the rate limit for the user, retry when it's reset,
+        # according to the reply from the failing API call
+        e = sys.exc_info()[1]
+        logger.debug('Rate limit reached, will try again in %s seconds' %
+                     e.retry_after_secs)
+        raise get_time_series_data.retry(e, countdown=e.retry_after_secs)
+    except Exception:
+        exc = sys.exc_info()[1]
+        logger.exception("Exception updating data: %s" % exc)
+        raise Reject(exc, requeue=False)
+
+
+@shared_task
+def get_intraday_data(fitbit_user, cat, resource, date):
+    """ Get the user's intraday data for a specified date"""
+    try:
+        _type = TimeSeriesDataType.objects.get(category=cat, resource=resource)
+    except TimeSeriesDataType.DoesNotExist:
+        logger.exception("The resource %s in category %s doesn't exist" % (
+            resource, cat))
+        raise Reject(sys.exc_info()[1], requeue=False)
+    if not _type.intraday_support:
+        logger.exception("The resource %s in category %s does not support "
+                         "intraday time series" % (resource, cat))
+        raise Reject(sys.exc_info()[1], requeue=False)
+
+    # Create a lock so we don't try to run the same task multiple times
+    sdat = date.strftime('%Y-%m-%d') if date else 'ALL'
+    lock_id = '{0}-lock-{1}-{2}-{3}'.format(__name__, fitbit_user, _type, sdat)
+    if not cache.add(lock_id, 'true', LOCK_EXPIRE):
+        logger.debug('Already retrieving intraday %s data for date %s, user %s' % (
+            _type, fitbit_user, sdat))
+        raise Ignore()
+
+    fbusers = UserFitbit.objects.filter(fitbit_user=fitbit_user)
+    dates = {'base_date': date, 'period': '1d'}
+    try:
+        for fbuser in fbusers:
+            data = utils.get_fitbit_data(fbuser, _type, return_all=True, **dates)
+            # logger.info(data)
+            resource_path = _type.path().replace('/', '-')
+            key = resource_path + "-intraday"
+            if data[key]['datasetType'] != 'minute':
+                logger.exception("The resource returned is not minute-level data")
+                raise Reject(sys.exc_info()[1], requeue=False)
+            intraday = data[key]['dataset']
+            logger.info("Date for intraday task: {}".format(date))
+            for minute in intraday:
+                datetime = parser.parse(minute['time'], default=date)
+                value = minute['value']
+                # Don't create unnecessary records
+                if int(float(value)) == 0:
+                    continue
+                # Create new record or update existing record
                 tsd, created = TimeSeriesData.objects.get_or_create(
-                    user=fbuser.user, resource_type=_type, date=date)
-                tsd.value = datum['value']
+                    user=fbuser.user, resource_type=_type, date=datetime)
+                tsd.value = value
+                tsd.intraday = True
                 tsd.save()
         # Release the lock
         cache.delete(lock_id)

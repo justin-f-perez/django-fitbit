@@ -4,7 +4,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "calories"
+      "resource": "calories",
+      "intraday_support": true
     }
   },
   {
@@ -12,7 +13,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "caloriesBMR"
+      "resource": "caloriesBMR",
+      "intraday_support": false
     }
   },
   {
@@ -20,7 +22,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "steps"
+      "resource": "steps",
+      "intraday_support": true
     }
   },
   {
@@ -28,7 +31,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "distance"
+      "resource": "distance",
+      "intraday_support": true
     }
   },
   {
@@ -36,7 +40,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "floors"
+      "resource": "floors",
+      "intraday_support": true
     }
   },
   {
@@ -44,7 +49,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "elevation"
+      "resource": "elevation",
+      "intraday_support": true
     }
   },
   {
@@ -52,7 +58,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "minutesSedentary"
+      "resource": "minutesSedentary",
+      "intraday_support": false
     }
   },
   {
@@ -60,7 +67,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "minutesLightlyActive"
+      "resource": "minutesLightlyActive",
+      "intraday_support": false
     }
   },
   {
@@ -68,7 +76,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "minutesFairlyActive"
+      "resource": "minutesFairlyActive",
+      "intraday_support": false
     }
   },
   {
@@ -76,7 +85,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "minutesVeryActive"
+      "resource": "minutesVeryActive",
+      "intraday_support": false
     }
   },
   {
@@ -84,7 +94,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "activeScore"
+      "resource": "activeScore",
+      "intraday_support": false
     }
   },
   {
@@ -92,7 +103,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "activityCalories"
+      "resource": "activityCalories",
+      "intraday_support": false
     }
   },
   {
@@ -100,7 +112,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/minutesSedentary"
+      "resource": "tracker/minutesSedentary",
+      "intraday_support": false
     }
   },
   {
@@ -108,7 +121,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/minutesLightlyActive"
+      "resource": "tracker/minutesLightlyActive",
+      "intraday_support": false
     }
   },
   {
@@ -116,7 +130,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/minutesFairlyActive"
+      "resource": "tracker/minutesFairlyActive",
+      "intraday_support": false
     }
   },
   {
@@ -124,7 +139,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/minutesVeryActive"
+      "resource": "tracker/minutesVeryActive",
+      "intraday_support": false
     }
   },
   {
@@ -132,7 +148,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/activeScore"
+      "resource": "tracker/activeScore",
+      "intraday_support": false
     }
   },
   {
@@ -140,7 +157,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/activityCalories"
+      "resource": "tracker/activityCalories",
+      "intraday_support": false
     }
   },
   {
@@ -148,7 +166,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/calories"
+      "resource": "tracker/calories",
+      "intraday_support": false
     }
   },
   {
@@ -156,7 +175,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/steps"
+      "resource": "tracker/steps",
+      "intraday_support": false
     }
   },
   {
@@ -164,7 +184,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/distance"
+      "resource": "tracker/distance",
+      "intraday_support": false
     }
   },
   {
@@ -172,7 +193,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/floors"
+      "resource": "tracker/floors",
+      "intraday_support": false
     }
   },
   {
@@ -180,7 +202,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 1,
-      "resource": "tracker/elevation"
+      "resource": "tracker/elevation",
+      "intraday_support": false
     }
   },
   {
@@ -188,7 +211,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 3,
-      "resource": "weight"
+      "resource": "weight",
+      "intraday_support": false
     }
   },
   {
@@ -196,7 +220,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 3,
-      "resource": "bmi"
+      "resource": "bmi",
+      "intraday_support": false
     }
   },
   {
@@ -204,7 +229,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 3,
-      "resource": "fat"
+      "resource": "fat",
+      "intraday_support": false
     }
   },
   {
@@ -212,7 +238,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "startTime"
+      "resource": "startTime",
+      "intraday_support": false
     }
   },
   {
@@ -220,7 +247,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "timeInBed"
+      "resource": "timeInBed",
+      "intraday_support": false
     }
   },
   {
@@ -228,7 +256,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "minutesAsleep"
+      "resource": "minutesAsleep",
+      "intraday_support": false
     }
   },
   {
@@ -236,7 +265,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "awakeningsCount"
+      "resource": "awakeningsCount",
+      "intraday_support": false
     }
   },
   {
@@ -244,7 +274,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "minutesAwake"
+      "resource": "minutesAwake",
+      "intraday_support": false
     }
   },
   {
@@ -252,7 +283,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "minutesToFallAsleep"
+      "resource": "minutesToFallAsleep",
+      "intraday_support": false
     }
   },
   {
@@ -260,7 +292,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "minutesAfterWakeup"
+      "resource": "minutesAfterWakeup",
+      "intraday_support": false
     }
   },
   {
@@ -268,7 +301,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 2,
-      "resource": "efficiency"
+      "resource": "efficiency",
+      "intraday_support": false
     }
   },
   {
@@ -276,7 +310,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 0,
-      "resource": "log/caloriesIn"
+      "resource": "log/caloriesIn",
+      "intraday_support": false
     }
   },
   {
@@ -284,7 +319,8 @@
     "model": "fitapp.timeseriesdatatype",
     "fields": {
       "category": 0,
-      "resource": "log/water"
+      "resource": "log/water",
+      "intraday_support": false
     }
   }
 ]

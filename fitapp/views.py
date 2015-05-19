@@ -83,14 +83,14 @@ def complete(request):
     URL name:
         `fitbit-complete`
     """
-    user_model = UserFitbit.user.field.to
+    user_model = UserFitbit.user.field
 
     fb = utils.create_fitbit()
     try:
         token = request.session.pop('token')
         verifier = request.GET.get('oauth_verifier')
         fb_user_id = int(request.session['fb_user_id'])
-        user = user_model.objects.get(pk=fb_user_id)
+        user = user_model.rel.to.objects.get(pk=fb_user_id)
     except KeyError:
         return redirect(reverse('fitbit-error'))
     try:
@@ -114,7 +114,6 @@ def complete(request):
             SUBSCRIBER_ID = utils.get_setting('FITAPP_SUBSCRIBER_ID')
         except ImproperlyConfigured:
             return redirect(reverse('fitbit-error'))
-        print "User would be subscribed at this point"
         subscribe.apply_async((fbuser.fitbit_user, SUBSCRIBER_ID), countdown=5)
         # Create tasks for all data in all data types
         for i, _type in enumerate(TimeSeriesDataType.objects.all()):
@@ -181,10 +180,10 @@ def logout(request):
     URL name:
         `fitbit-logout`
     """
-    user_model = UserFitbit.user.field.to
+    user_model = UserFitbit.user.field
     try:
         fb_user_id = request.session['fb_user_id']
-        user = user_model.objects.get(pk=fb_user_id)
+        user = user_model.rel.to.objects.get(pk=fb_user_id)
     except KeyError:
         return redirect(reverse('fitbit-error'))
     try:
@@ -203,7 +202,7 @@ def logout(request):
         'FITAPP_LOGOUT_REDIRECT')
     return redirect(next_url)
 
-# TODO: modify update() to accomodate new models
+
 @csrf_exempt
 def update(request):
     """Receive notification from Fitbit.
@@ -370,11 +369,11 @@ def get_data(request, category, resource):
     URL name:
         `fitbit-data`
     """
-    user_model = UserFitbit.user.field.to
+    user_model = UserFitbit.user.field
 
     try:
         fb_user_id = int(request.session['fb_user_id'])
-        user = user_model.objects.get(pk=fb_user_id)
+        user = user_model.rel.to.objects.get(pk=fb_user_id)
     except KeyError:
         return redirect(reverse('fitbit-error'))
 
