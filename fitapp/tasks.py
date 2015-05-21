@@ -12,7 +12,7 @@ from .models import UserFitbit, TimeSeriesData, TimeSeriesDataType
 
 
 logger = logging.getLogger(__name__)
-LOCK_EXPIRE = 60 * 5 # Lock expires in 5 minutes
+LOCK_EXPIRE = 60 * 5  # Lock expires in 5 minutes
 
 
 @shared_task
@@ -103,7 +103,8 @@ def get_time_series_data(fitbit_user, cat, resource, date=None):
         e = sys.exc_info()[1]
         logger.debug('Rate limit reached, will try again in %s seconds' %
                      e.retry_after_secs)
-        raise get_time_series_data.retry(e, countdown=e.retry_after_secs)
+
+        raise get_time_series_data.retry(exc=e, countdown=e.retry_after_secs)
     except Exception:
         exc = sys.exc_info()[1]
         logger.exception("Exception updating data: %s" % exc)
@@ -137,7 +138,6 @@ def get_intraday_data(fitbit_user, cat, resource, date):
     try:
         for fbuser in fbusers:
             data = utils.get_fitbit_data(fbuser, _type, return_all=True, **dates)
-            # logger.info(data)
             resource_path = _type.path().replace('/', '-')
             key = resource_path + "-intraday"
             if data[key]['datasetType'] != 'minute':
@@ -165,7 +165,7 @@ def get_intraday_data(fitbit_user, cat, resource, date):
         e = sys.exc_info()[1]
         logger.debug('Rate limit reached, will try again in %s seconds' %
                      e.retry_after_secs)
-        raise get_time_series_data.retry(e, countdown=e.retry_after_secs)
+        raise get_intraday_data.retry(countdown=e.retry_after_secs)
     except Exception:
         exc = sys.exc_info()[1]
         logger.exception("Exception updating data: %s" % exc)
