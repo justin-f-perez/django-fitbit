@@ -1,41 +1,24 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
-
-class Migration(SchemaMigration):
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Removing unique constraint on 'TimeSeriesData', fields ['user', 'resource_type', 'date']
-        db.delete_unique('fitapp_timeseriesdata', ['user_id', 'resource_type_id', 'date'])
-
-        # Adding field 'TimeSeriesData.intraday'
-        db.add_column('fitapp_timeseriesdata', 'intraday',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-
-        # Changing field 'TimeSeriesData.date'
-        db.alter_column('fitapp_timeseriesdata', 'date', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding unique constraint on 'TimeSeriesData', fields ['user', 'resource_type', 'date', 'intraday']
-        db.create_unique('fitapp_timeseriesdata', ['user_id', 'resource_type_id', 'date', 'intraday'])
-
+        # Note: Don't use "from appname.models import ModelName".
+        # Use orm.ModelName to refer to models in this application,
+        # and orm['appname.ModelName'] for models in other applications.
+        supported = orm.TimeSeriesDataType.objects.filter(category=1, resource__in=['calories','distance','elevation','floors','heart','steps'])
+        for type in supported:
+            type.intraday_support = True
+            type.save()
 
     def backwards(self, orm):
-        # Removing unique constraint on 'TimeSeriesData', fields ['user', 'resource_type', 'date', 'intraday']
-        db.delete_unique('fitapp_timeseriesdata', ['user_id', 'resource_type_id', 'date', 'intraday'])
-
-        # Deleting field 'TimeSeriesData.intraday'
-        db.delete_column('fitapp_timeseriesdata', 'intraday')
-
-
-        # Changing field 'TimeSeriesData.date'
-        db.alter_column('fitapp_timeseriesdata', 'date', self.gf('django.db.models.fields.DateField')())
-        # Adding unique constraint on 'TimeSeriesData', fields ['user', 'resource_type', 'date']
-        db.create_unique('fitapp_timeseriesdata', ['user_id', 'resource_type_id', 'date'])
-
+        # Here we would unset the intraday_support boolean, but that's unnecessary as the field
+        # will just be deleted by the next migration. So we'll just do nothing.
+        pass
 
     models = {
         'auth.group': {
@@ -82,30 +65,6 @@ class Migration(SchemaMigration):
             'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'}),
             'practitioner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
-        'fitapp.ariadata': {
-            'Meta': {'object_name': 'AriaData'},
-            'bmi': ('django.db.models.fields.DecimalField', [], {'max_digits': '3', 'decimal_places': '1'}),
-            'body_fat': ('django.db.models.fields.DecimalField', [], {'max_digits': '3', 'decimal_places': '1'}),
-            'body_weight': ('django.db.models.fields.DecimalField', [], {'max_digits': '4', 'decimal_places': '1'}),
-            'date': ('django.db.models.fields.DateField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dispatch.Patient']"})
-        },
-        'fitapp.daystepdata': {
-            'Meta': {'unique_together': "(('user', 'date'),)", 'object_name': 'DayStepData'},
-            'date': ('django.db.models.fields.DateField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'steps': ('django.db.models.fields.IntegerField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dispatch.Patient']"})
-        },
-        'fitapp.minutestepdata': {
-            'Meta': {'unique_together': "(('user', 'time'),)", 'object_name': 'MinuteStepData'},
-            'day': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['fitapp.DayStepData']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'steps': ('django.db.models.fields.IntegerField', [], {}),
-            'time': ('django.db.models.fields.DateField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dispatch.Patient']"})
-        },
         'fitapp.timeseriesdata': {
             'Meta': {'unique_together': "(('user', 'resource_type', 'date', 'intraday'),)", 'object_name': 'TimeSeriesData'},
             'date': ('django.db.models.fields.DateTimeField', [], {}),
@@ -133,3 +92,4 @@ class Migration(SchemaMigration):
     }
 
     complete_apps = ['fitapp']
+    symmetrical = True
