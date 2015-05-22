@@ -128,7 +128,6 @@ def complete(request):
     return redirect(next_url)
 
 
-# @receiver(user_logged_in)  # I think this wouldn't work for our integration
 def create_fitbit_session(sender, request, user, **kwargs):
     """ If the user is a fitbit user, update the profile in the session. """
 
