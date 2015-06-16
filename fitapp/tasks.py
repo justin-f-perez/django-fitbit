@@ -94,7 +94,7 @@ def get_time_series_data(fitbit_user, cat, resource, date=None):
                             # bog down the server
                             get_intraday_data.apply_async(
                                 (fbuser.fitbit_user, _type.category,
-                                 _type.resource, tz_offset), {'date': date},
+                                 _type.resource, date, tz_offset),
                                 countdown=(2 * i))
                     # Create new record or update existing record
                     tsd, created = TimeSeriesData.objects.get_or_create(
