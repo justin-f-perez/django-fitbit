@@ -77,7 +77,7 @@ def get_fitbit_profile(fbuser, key=None):
     :return:
     """
 
-    fb = create_fitbit(**fbuser.get_user_data)
+    fb = create_fitbit(**fbuser.get_user_data())
     data = fb.user_profile_get()
     data = data['user']
     if key:
