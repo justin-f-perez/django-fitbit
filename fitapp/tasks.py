@@ -158,7 +158,7 @@ def get_intraday_data(fitbit_user, cat, resource, date, tz_offset):
             logger.info("Date for intraday task: {}".format(date))
             for minute in intraday:
                 datetime = parser.parse(minute['time'], default=date)
-                utc_datetime = datetime + timedelta(hours=tz_offset)
+                utc_datetime = datetime - timedelta(hours=tz_offset)
                 utc_datetime = utc_datetime.replace(tzinfo=utc)
                 value = minute['value']
                 # Don't create unnecessary records
